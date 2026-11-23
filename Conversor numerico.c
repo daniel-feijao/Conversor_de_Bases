@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <locale.h>
+#include <math.h>
+
 
 //==========================================================================================
 //==========================================================================================
@@ -229,6 +232,7 @@ void converter_Dec_Hexa(double num_decimal) {
 	int divisor = (int)num_decimal;
 	
 	
+	
 	for(i=0; divisor != 0; i++) {
 		
 		resto = divisor % 16;
@@ -236,11 +240,10 @@ void converter_Dec_Hexa(double num_decimal) {
 		hexad[i] = resto;
 		cont++;
 	}
-	cont -= 1; //isso serve pois na impressao estava saindo um vetor não atribuido, gerando lixo de memoria
+	cont -= 1 ;//isso serve pois na impressao estava saindo um vetor não atribuido, gerando lixo de memoria
 	trocar_base_hexa(hexad, cont);  //função anterior para a impressão.
  
 }
-
 
 //==========================================================================================
 //==========================================================================================
@@ -307,27 +310,300 @@ long long int Transforma_base_HOB_decimal(char num[32], int base){
 //==========================================================================================
 //==========================================================================================
 
+// Função que converte uma string em binário (sem sinal) para decimal
+long long binario_para_decimal(char binario[]){
+	long long decimal = 0;   // Acumula o valor decimal final
+	long long potencia = 1;  // Representa 2^0, 2^1, 2^2... conforme anda da direita para a esquerda
+	int tamanho = strlen(binario); // Quantidade de caracteres da string binária
+	int i;
+	
+	// Percorre a string do último caractere (menos significativo) até o primeiro (mais significativo)
+	for(i = tamanho - 1; i >= 0; i--){
+		if(binario[i] == '1'){
+			decimal = decimal + potencia; // Soma a potência de 2 correspondente à posição do '1'
+		} else if (binario[i] != '0'){
+			// Se não for '1' nem '0', há caractere inválido (nota: "return =-1;" tem erro de sintaxe; o correto é "return -1;")
+			return -1;
+		}
+		potencia = potencia * 2; // Atualiza a potência de 2 para o próximo dígito à esquerda
+	}
+	return decimal; // Retorna o valor convertido em decimal
+}
+
+void decimal_quebrado_para_octal(){
+	int casas,i;
+	double fracao;
+	if(fracao <=0 || casas <= 0)return;
+	
+	for (i=0;i < casas;i++){
+		fracao *=8;
+		int digito = (int)fracao;
+		printf("%d",digito);
+		fracao -= digito;
+		
+		if(fracao == 0) break;
+	}
+}
 
 //aplicção de exemplo:
-main(){
+int main(){
 	char a[32];
 	float b;
 	int c;
 	long long int d;
-	while (1){
-		inputS("digite um numero: ", a);
-		printf("numero digitado: %s \n", a);
+	 
+	 setlocale(LC_ALL, "Portuguese"); // Configura acentuação/idioma para português
+	int opcao, resultado;            // 'opcao' guarda a escolha do menu; 'resultado' recebe o retorno da conversão
+	long long int decimal_para_octal; // Armazena o número decimal informado na opção 7
+	char resposta[10] = "sim", resposta_nova[10] = "sim"; // Controlam se o usuário quer continuar
+	char bin[65];                    // Buffer para até 64 bits + caractere nulo '\0'
 	
-		inputF("digite uma base numerica: ", &b);
-		printf("base digitada: %.0f\n", b);
-		c = b;
-		d = Transforma_base_HOB_decimal(a, c);
+	printf("Gostaria de fazer alguma conversão meu nobre: ");
+	scanf("%9s", resposta); // Lê até 9 caracteres evitando estourar o array 'resposta'
+
+		
+	// Enquanto a resposta inicial for "sim" ou "SIM"
+	while(strcmp(resposta, "sim") == 0 || strcmp(resposta, "SIM") == 0){
+		
+		do{
+	 		printf("\nPerfeito :) !!!!\n");
+	 		// Exibe as opções do menu de conversões
+	 		printf(" 1. Decimal para Binário\n");
+            printf(" 2. Decimal para Octal\n");
+            printf(" 3. Decimal para Hexadecimal\n");
+            printf(" 4. Binário para Decimal\n");
+            printf(" 5. Binário para Octal\n");
+            printf(" 6. Binário para Hexadecimal\n");
+            printf(" 7. Octal para Decimal\n");
+            printf(" 8. Octal para Binário\n");
+            printf(" 9. Octal para Hexadecimal\n");
+            printf("10. Hexadecimal para Decimal\n");
+            printf("11. Hexadecimal para Binário\n");
+            printf("12. Hexadecimal para Octal\n");
+            printf("0. Sair do menu de conversão\n");
+            printf("\nEscolhe aí qual conversão tu quer meu consagrado :) !!!!\n");
+            scanf("%d", &opcao); // Lê a opção escolhida pelo usuário
+            system("cls");
+            
+            
+                switch(opcao){
+                case 1: // Decimal para Binário
+                {
+                    double dec_bin;
+                    s_numero num_bin;
+                    printf("\nBeleza :) !!!!\n");
+                    printf("Digite o número decimal para transformar em binário: ");
+                    scanf("%lf", &dec_bin);
+                    system("cls");
+                    dividirDecimal(dec_bin, &num_bin);
+                    printf("Seu número para transformação é: %lf\n", dec_bin);
+                    printf("E esse é seu número transformado em binário: ");
+                    converterDec_Bin(&num_bin);
+                    printf("\n");
+                    break;
+                }
+
+                	case 2: // Na mensagem pede decimal para octal (embora o menu liste 7 como Octal para Decimal)
+			        printf("\nShow :) !!!!\n");
+				    printf("Digite o número que você quer transformar de decimal para octal: ");
+				    scanf("%lf", &decimal_para_octal); // Lê tanto número inteiro quanto quebrado
+				    system("cls"); // Limpa a tela no Windows
+			
+				    // Separa a parte inteira e a parte quebrada usando valor absoluto
+				    double valorAbsoluto = fabs(decimal_para_octal);
+				    long long parteInteira = (long long)valorAbsoluto;
+				    double parteQuebrada = valorAbsoluto - parteInteira;
 	
-		printf("numero original: %s, numero transformado: %lld \n\n", a, d);
-	}
+	    // IF para verificar se o número é QUEBRADO
+				    if (parteQuebrada > 0) {
+				        printf("Seu número quebrado para transformação é: %g", decimal_para_octal);
+				        printf("\nE esse é seu número transformado: ");
+				        
+				        if (decimal_para_octal < 0) printf("-"); // Mantém o sinal se for negativo
+				        
+				        printf("%llo", parteInteira);           // Imprime a parte normal em octal
+				        decimal_quebrado_para_octal(parteQuebrada, 5);  // Chama o void para a parte quebrada
+				        printf("\n");
+				    } 
+				    // ELSE para quando o número for NORMAL (inteiro)
+				    else {
+				        long long numeroNormal = (long long)decimal_para_octal;
+				        
+				        if (numeroNormal >= 0) {
+				            printf("Seu número para transformação é: %lld", numeroNormal);
+				            printf("\nE esse é seu número transformado: %llo\n", numeroNormal);
+				        } else {
+				            printf("Seu número para transformação é: %lld", numeroNormal);
+				            printf("\nE esse é seu número transformado: -%llo\n", parteInteira);
+				        }
+				    }
+	    break;
+
+                case 3: // Decimal para Hexadecimal
+                {
+                    double dec_hex;
+                    printf("\nTop :) !!!!\n");
+                    printf("Digite o número decimal para transformar em hexadecimal: ");
+                    scanf("%lf", &dec_hex);
+                    system("cls");
+                    printf("Seu número para transformação é: %.0lf\n", dec_hex);
+                    printf("E esse é seu número transformado em hexadecimal: ");
+                    converter_Dec_Hexa(dec_hex);
+                    printf("\n");
+                    break;
+                }
+
+                case 4: // Binário para Decimal
+                    printf("\nBeleza :) !!!!\n");
+                    printf("Digite o número que você quer transformar de binário para decimal: ");
+                    scanf("%64s", bin);
+                    system("cls");
+                    resultado = binario_para_decimal(bin);
+                    if (resultado == -1) {
+                        printf("\nEi, esse aqui pode não >:c\n");
+                    } else {
+                        printf("Seu número para transformação é: %s\n", bin);
+                        printf("E esse é seu número transformado: %d\n", resultado);
+                    }
+                    break;
+
+                case 5: // Binário para Octal
+                    printf("\nBeleza :) !!!!\n");
+                    printf("Digite o número binário para transformar em octal: ");
+                    scanf("%64s", bin);
+                    system("cls");
+                    d = binario_para_decimal(bin);
+                    if (d == -1) {
+                        printf("\nEi, esse aqui pode não >:c\n");
+                    } else {
+                        printf("Seu número para transformação é: %s\n", bin);
+                        printf("E esse é seu número transformado em octal: %llo\n", d);
+                    }
+                    break;
+
+                case 6: // Binário para Hexadecimal
+                    printf("\nBeleza :) !!!!\n");
+                    printf("Digite o número binário para transformar em hexadecimal: ");
+                    scanf("%64s", bin);
+                    system("cls");
+                    d = binario_para_decimal(bin);
+                    if (d == -1) {
+                        printf("\nEi, esse aqui pode não >:c\n");
+                    } else {
+                        printf("Seu número para transformação é: %s\n", bin);
+                        printf("E esse é seu número transformado em hexadecimal: ");
+                        converter_Dec_Hexa((double)d);
+                        printf("\n");
+                    }
+                    break;
+
+                case 7: // Octal para Decimal
+                    printf("\nShow :) !!!!\n");
+                    printf("Digite o número octal para transformar em decimal: ");
+                    scanf("%31s", a);
+                    system("cls");
+                    printf("Seu número para transformação é: %s\n", a);
+                    d = Transforma_base_HOB_decimal(a, 8);
+                    printf("E esse é seu número transformado em decimal: %lld\n", d);
+                    break;
+
+                case 8: // Octal para Binário
+                {
+                    s_numero num_oct_bin;
+                    printf("\nShow :) !!!!\n");
+                    printf("Digite o número octal para transformar em binário: ");
+                    scanf("%31s", a);
+                    system("cls");
+                    printf("Seu número para transformação é: %s\n", a);
+                    d = Transforma_base_HOB_decimal(a, 8);
+                    dividirDecimal((double)d, &num_oct_bin);
+                    printf("E esse é seu número transformado em binário: ");
+                    converterDec_Bin(&num_oct_bin);
+                    printf("\n");
+                    break;
+                }
+
+                case 9: // Octal para Hexadecimal
+                    printf("\nShow :) !!!!\n");
+                    printf("Digite o número octal para transformar em hexadecimal: ");
+                    scanf("%31s", a);
+                    system("cls");
+                    printf("Seu número para transformação é: %s\n", a);
+                    d = Transforma_base_HOB_decimal(a, 8);
+                    printf("E esse é seu número transformado em hexadecimal: ");
+                    converter_Dec_Hexa((double)d);
+                    printf("\n");
+                    break;
+
+                case 10: // Hexadecimal para Decimal
+                    printf("\nMassa :) !!!!\n");
+                    printf("Digite o número hexadecimal para transformar em decimal: ");
+                    scanf("%31s", a);
+                    system("cls");
+                    printf("Seu número para transformação é: %s\n", a);
+                    d = Transforma_base_HOB_decimal(a, 16);
+                    printf("E esse é seu número transformado em decimal: %lld\n", d);
+                    break;
+
+                case 11: // Hexadecimal para Binário
+                {
+                    s_numero num_hex_bin;
+                    printf("\nMassa :) !!!!\n");
+                    printf("Digite o número hexadecimal para transformar em binário: ");
+                    scanf("%31s", a);
+                    system("cls");
+                    printf("Seu número para transformação é: %s\n", a);
+                    d = Transforma_base_HOB_decimal(a, 16);
+                    dividirDecimal((double)d, &num_hex_bin);
+                    printf("E esse é seu número transformado em binário: ");
+                    converterDec_Bin(&num_hex_bin);
+                    printf("\n");
+                    break;
+                }
+
+                case 12: // Hexadecimal para Octal
+                    printf("\nMassa :) !!!!\n");
+                    printf("Digite o número hexadecimal para transformar em octal: ");
+                    scanf("%31s", a);
+                    system("cls");
+                    printf("Seu número para transformação é: %s\n", a);
+                    d = Transforma_base_HOB_decimal(a, 16);
+                    printf("E esse é seu número transformado em octal: %llo\n", d);
+                    break;
+
+                case 0:
+                    printf("Encerrando menu de conversões...\n");
+                    break;
+
+                default:
+                    printf("Opção inválida! Escolha entre 0 e 12.\n");
+                    break;
+            }
+
+
+            // Pergunta se deseja fazer outra conversão dentro do laço 'do...while'
+            printf("\nGostaria de fazer mais alguma conversão?\n");
+			scanf("%9s", resposta_nova);
+			if(strcmp(resposta_nova, "sim") == 0 || strcmp(resposta_nova, "SIM") == 0){
+				continue; // Volta para o início do 'do...while'
+			} else {
+				break; // Sai do 'do...while'
+			}
+
+        } while (opcao != 0); // Se o usuário digitou 0 e respondeu "sim" acima, o 'do...while' ainda repetiria uma vez
+
+        strcpy(resposta, "não"); // Garante que o 'while' externo encerre após sair do 'do...while'
+  }
+ } 
+
+
+
+
 	
 	
 	
+
+
 	
 	
-}
+
